@@ -1,0 +1,1 @@
+cmd_/home/zbc/ctest/os_code/os_kernel/hellomod.ko := ld -r -m elf_x86_64  -z max-page-size=0x200000  --build-id  -T ./scripts/module-common.lds -o /home/zbc/ctest/os_code/os_kernel/hellomod.ko /home/zbc/ctest/os_code/os_kernel/hellomod.o /home/zbc/ctest/os_code/os_kernel/hellomod.mod.o;  true
