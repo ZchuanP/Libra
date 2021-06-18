@@ -7,33 +7,49 @@
 struct meal{
     pthread_mutex_t chopsticks_left;
     pthread_mutex_t chopsticks_right;
+    pthread_mutex_t person_lock;
 };
-extern void METEX(struct meal* meal, pthread_mutex_t left, pthread_mutex_t right)
+extern void METEX(struct meal* meal, pthread_mutex_t left, pthread_mutex_t right, pthread_mutex_t person_lock)
 {
     meal->chopsticks_left=left;
     meal->chopsticks_right=right;
+    meal->person_lock=person_lock;
 }
 
+int person_have=0;
 
 void* philosopher1(void* arg) {
     struct meal* meal1 = (struct meal *)arg;
     int num=0;
     while(num<30) {
+        int i=0;
         printf("哲学家1第%d次思考1秒\n",num);
         sleep(0.1);
+        while(person_have >= 4) {
 
-        pthread_mutex_trylock(&meal1->chopsticks_left);
+            if(i==0) {
+                printf("哲学家1避免死锁，不拿筷子\n");
+                i++;
+            }
+        }
+        pthread_mutex_lock(&meal1->person_lock);
+        person_have++;
+        pthread_mutex_unlock(&meal1->person_lock);
+        pthread_mutex_lock(&meal1->chopsticks_left);
 
-        pthread_mutex_trylock(&meal1->chopsticks_right);
+        pthread_mutex_lock(&meal1->chopsticks_right);
 
-        int meal_time=rand()%2+1;
-        printf("哲学家1第%d次进餐%d秒\n",num, meal_time);
-        sleep(meal_time);
-//        printf("哲学家1第%d次进餐1秒\n",num);
-//        sleep(1);
+        //int meal_time=rand()%5+3;
+        //printf("哲学家1第%d次进餐%d秒\n",num, meal_time);
+        //sleep(meal_time);
+        printf("哲学家1第%d次进餐1秒\n",num);
+        sleep(1);
 
         pthread_mutex_unlock(&meal1->chopsticks_right);
         pthread_mutex_unlock(&meal1->chopsticks_left);
+        pthread_mutex_lock(&meal1->person_lock);
+        person_have--;
+        pthread_mutex_unlock(&meal1->person_lock);
         num++;
     }
     return NULL;
@@ -43,21 +59,34 @@ void* philosopher2(void* arg) {
     struct meal* meal2 = (struct meal *)arg;
     int num=0;
     while(num<30) {
+        int i=0;
         printf("哲学家2第%d次思考1秒\n",num);
         sleep(0.1);
+        while(person_have >= 4) {
 
-        pthread_mutex_trylock(&meal2->chopsticks_left);
-        pthread_mutex_trylock(&meal2->chopsticks_right);
+            if(i==0) {
+                printf("哲学家2避免死锁，不拿筷子\n");
+                i++;
+            }
+        }
+        pthread_mutex_lock(&meal2->person_lock);
+        person_have++;
+        pthread_mutex_unlock(&meal2->person_lock);
 
-        int meal_time=rand()%2+1;
-        printf("哲学家2第%d次进餐%d秒\n",num, meal_time);
-        sleep(meal_time);
-//        printf("哲学家2第%d次进餐1秒\n",num);
-//        sleep(1);
+        pthread_mutex_lock(&meal2->chopsticks_left);
+        pthread_mutex_lock(&meal2->chopsticks_right);
+
+//        int meal_time=rand()%5+3;
+//        printf("哲学家2第%d次进餐%d秒\n",num, meal_time);
+//        sleep(meal_time);
+        printf("哲学家2第%d次进餐1秒\n",num);
+        sleep(1);
 
         pthread_mutex_unlock(&meal2->chopsticks_right);
         pthread_mutex_unlock(&meal2->chopsticks_left);
-
+        pthread_mutex_lock(&meal2->person_lock);
+        person_have--;
+        pthread_mutex_unlock(&meal2->person_lock);
         num++;
     }
     return NULL;
@@ -67,21 +96,34 @@ void* philosopher3(void* arg) {
     struct meal* meal3 = (struct meal *)arg;
     int num=0;
     while(num<30) {
+        int i=0;
         printf("哲学家3第%d次思考1秒\n",num);
         sleep(0.1);
+        while(person_have >= 4) {
+            if(i==0) {
+                printf("哲学家3避免死锁，不拿筷子\n");
+                i++;
+            }
+        }
 
-        pthread_mutex_trylock(&meal3->chopsticks_left);
-        pthread_mutex_trylock(&meal3->chopsticks_right);
+        pthread_mutex_lock(&meal3->person_lock);
+        person_have++;
+        pthread_mutex_unlock(&meal3->person_lock);
 
-        int meal_time=rand()%2+1;
-        printf("哲学家3第%d次进餐%d秒\n",num, meal_time);
-        sleep(meal_time);
-//        printf("哲学家3第%d次进餐1秒\n",num);
-//        sleep(1);
+        pthread_mutex_lock(&meal3->chopsticks_left);
+        pthread_mutex_lock(&meal3->chopsticks_right);
+
+//        int meal_time=rand()%5+3;
+//        printf("哲学家3第%d次进餐%d秒\n",num, meal_time);
+//        sleep(meal_time);
+        printf("哲学家3第%d次进餐1秒\n",num);
+        sleep(1);
 
         pthread_mutex_unlock(&meal3->chopsticks_right);
         pthread_mutex_unlock(&meal3->chopsticks_left);
-
+        pthread_mutex_lock(&meal3->person_lock);
+        person_have--;
+        pthread_mutex_unlock(&meal3->person_lock);
         num++;
     }
     return NULL;
@@ -91,23 +133,33 @@ void* philosopher4(void* arg) {
     struct meal* meal4 = (struct meal *)arg;
     int num=0;
     while(num<30) {
+        int i=0;
         printf("哲学家4第%d次思考1秒\n",num);
         sleep(0.1);
+        while(person_have >= 4) {
+            if(i==0) {
+                printf("哲学家4避免死锁，不拿筷子\n");
+                i=1;
+            }
+        }
+        pthread_mutex_lock(&meal4->person_lock);
+        person_have++;
+        pthread_mutex_unlock(&meal4->person_lock);
+        pthread_mutex_lock(&meal4->chopsticks_left);
 
+        pthread_mutex_lock(&meal4->chopsticks_right);
 
-        pthread_mutex_trylock(&meal4->chopsticks_left);
-
-        pthread_mutex_trylock(&meal4->chopsticks_right);
-
-        int meal_time=rand()%2+1;
-        printf("哲学家4第%d次进餐%d秒\n",num, meal_time);
-        sleep(meal_time);
-//        printf("哲学家4第%d次进餐1秒\n",num);
-//        sleep(1);
+//        int meal_time=rand()%5+3;
+//        printf("哲学家4第%d次进餐%d秒\n",num, meal_time);
+//        sleep(meal_time);
+        printf("哲学家4第%d次进餐1秒\n",num);
+        sleep(1);
 
         pthread_mutex_unlock(&meal4->chopsticks_right);
         pthread_mutex_unlock(&meal4->chopsticks_left);
-
+        pthread_mutex_lock(&meal4->person_lock);
+        person_have--;
+        pthread_mutex_unlock(&meal4->person_lock);
         num++;
     }
     return NULL;
@@ -117,21 +169,33 @@ void* philosopher5(void* arg) {
     struct meal* meal5 = (struct meal *)arg;
     int num=0;
     while(num<30) {
+        int i=0;
         printf("哲学家5第%d次思考1秒\n",num);
         sleep(0.1);
+        while(person_have >= 4) {
+            if(i==0) {
+                printf("哲学家5避免死锁，不拿筷子\n");
+                i=1;
+            }
+        }
+        pthread_mutex_lock(&meal5->person_lock);
+        person_have++;
+        pthread_mutex_unlock(&meal5->person_lock);
+        pthread_mutex_lock(&meal5->chopsticks_left);
 
-        pthread_mutex_trylock(&meal5->chopsticks_left);
+        pthread_mutex_lock(&meal5->chopsticks_right);
 
-        pthread_mutex_trylock(&meal5->chopsticks_right);
-
-        int meal_time=rand()%2+1;
-        printf("哲学家5第%d次进餐%d秒\n",num, meal_time);
-        sleep(meal_time);
-//        printf("哲学家5第%d次进餐1秒\n",num);
-//        sleep(1);
+//        int meal_time=rand()%5+3;
+//        printf("哲学家5第%d次进餐%d秒\n",num, meal_time);
+//        sleep(meal_time);
+        printf("哲学家5第%d次进餐1秒\n",num);
+        sleep(1);
 
         pthread_mutex_unlock(&meal5->chopsticks_right);
         pthread_mutex_unlock(&meal5->chopsticks_left);
+        pthread_mutex_lock(&meal5->person_lock);
+        person_have--;
+        pthread_mutex_unlock(&meal5->person_lock);
         num++;
     }
     return NULL;
@@ -139,13 +203,14 @@ void* philosopher5(void* arg) {
 
 
 int main() {
+    pthread_mutex_t person_lock;
     pthread_mutex_t chopsticks1;
     pthread_mutex_t chopsticks2;
     pthread_mutex_t chopsticks3;
     pthread_mutex_t chopsticks4;
     pthread_mutex_t chopsticks5;
 
-    pthread_mutex_init(&chopsticks1, NULL);
+    pthread_mutex_init(&person_lock, NULL);
     pthread_mutex_init(&chopsticks1, NULL);
     pthread_mutex_init(&chopsticks2, NULL);
     pthread_mutex_init(&chopsticks3, NULL);
@@ -156,11 +221,11 @@ int main() {
     struct meal* meal3=(struct meal *)malloc(sizeof(struct meal));
     struct meal* meal4=(struct meal *)malloc(sizeof(struct meal));
     struct meal* meal5=(struct meal *)malloc(sizeof(struct meal));
-    METEX(meal1,chopsticks1,chopsticks2);
-    METEX(meal2,chopsticks2,chopsticks3);
-    METEX(meal3,chopsticks3,chopsticks4);
-    METEX(meal4,chopsticks4,chopsticks5);
-    METEX(meal5,chopsticks5,chopsticks1);
+    METEX(meal1,chopsticks1,chopsticks2,person_lock);
+    METEX(meal2,chopsticks2,chopsticks3,person_lock);
+    METEX(meal3,chopsticks3,chopsticks4,person_lock);
+    METEX(meal4,chopsticks4,chopsticks5,person_lock);
+    METEX(meal5,chopsticks5,chopsticks1,person_lock);
     pthread_t tid1, tid2, tid3, tid4, tid5;
 
     pthread_create(&tid1, NULL, (void*)philosopher1, (void*)meal1);
@@ -187,6 +252,6 @@ int main() {
     pthread_mutex_destroy(&chopsticks3);
     pthread_mutex_destroy(&chopsticks4);
     pthread_mutex_destroy(&chopsticks5);
-
+    pthread_mutex_destroy(&person_lock);
     return 0;
 }
